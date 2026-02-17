@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 
 export function TestSupabase() {
-    const [employees, setEmployees] = useState([])
+    const [employees, setEmployees] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
