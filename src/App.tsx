@@ -5,6 +5,7 @@ import './App.css'
 function App() {
     const [count, setCount] = useState(0)
     const [loading, setLoading] = useState(true)
+    const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
     // Al cargar la página, obtén el valor del contador
     useEffect(() => {
@@ -39,7 +40,10 @@ function App() {
 
         if (error) {
             console.error('Error al actualizar:', error)
+            setErrorMsg(JSON.stringify(error))
             setCount(count) // Revierte si falla
+        } else {
+            setErrorMsg(null)
         }
     }
 
@@ -54,6 +58,7 @@ function App() {
                         Contador: {count}
                     </button>
                     <p>Haz clic para incrementar (se guarda en la BD)</p>
+                    {errorMsg && <p style={{ color: 'red' }}>Error: {errorMsg}</p>}
                 </div>
             </div>
         </>
