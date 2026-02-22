@@ -1,35 +1,63 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useState, useEffect } from 'react'
+import { supabase } from '@/lib/supabase'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+    const [count, setCount] = useState(0)
+    const [loading, setLoading] = useState(true)
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    // Al cargar la página, obtén el valor del contador
+    useEffect(() => {
+        const fetchCounter = async () => {
+            const { data, error } = await supabase
+                .from('counter')
+                .select('value')
+                .eq('id', 1)
+                .single()
+
+            if (error) {
+                console.error('Error al obtener contador:', error)
+            } else {
+                setCount(data?.value || 0)
+            }
+            setLoading(false)
+        }
+
+        fetchCounter()
+    }, [])
+
+    // Cuando alguien incremente el contador, actualiza en la BD
+    const incrementCounter = async () => {
+        const newValue = count + 1
+        setCount(newValue)
+
+        // Actualiza en Supabase
+        const { error } = await supabase
+            .from('counter')
+            .update({ value: newValue })
+            .eq('id', 1)
+
+        if (error) {
+            console.error('Error al actualizar:', error)
+            setCount(count) // Revierte si falla
+        }
+    }
+
+    if (loading) return <p>Cargando contador...</p>
+
+    return (
+        <>
+            <div>
+                <h1>Contador Público</h1>
+                <div className="card">
+                    <button onClick={incrementCounter}>
+                        Contador: {count}
+                    </button>
+                    <p>Haz clic para incrementar (se guarda en la BD)</p>
+                </div>
+            </div>
+        </>
+    )
 }
 
 export default App
